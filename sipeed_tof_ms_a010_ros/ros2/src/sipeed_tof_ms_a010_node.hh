@@ -12,16 +12,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_depth;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_pointcloud;
 
-  // Timers
-  rclcpp::TimerBase::SharedPtr timer_;
-
-  float uvf_parms[4];
   std::unique_ptr<msa010> a010;
-  std::string s;
-  std::size_t count = 0;
-  frame_t * f;
-
-  void timer_callback();
 
 public:
   //! @brief Initialize ROS endpoints

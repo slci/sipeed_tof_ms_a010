@@ -8,14 +8,15 @@
 #include <vector>
 
 #include "frame_struct.h"
-frame_t *handle_process(const std::string &s) {
+frame_t * handle_process(const std::string & s)
+{
   static std::vector<uint8_t> vecChar;
   static const uint8_t sflag_l = FRAME_BEGIN_FLAG & 0xff;
   static const uint8_t sflag_h = (FRAME_BEGIN_FLAG >> 8) & 0xff;
   static const uint8_t eflag = FRAME_END_FLAG & 0xff;
 
   uint32_t frame_payload_len = 0;
-  frame_t *pf = NULL;
+  frame_t * pf = NULL;
   std::vector<uint8_t>::iterator it;
 
   // cout << "vecChar before: " << vecChar.size() << endl;
@@ -28,7 +29,7 @@ frame_t *handle_process(const std::string &s) {
   }
 
 __find_header:
-  for (it = vecChar.begin(); (*(it) != sflag_l) || (*(it + 1) != sflag_h);) {
+  for (it = vecChar.begin(); (*(it) != sflag_l) || (*(it + 1) != sflag_h); ) {
     /* find sflag_l from [1:] first and next in [it+1:] */
     it = find(it + 1, vecChar.end(), sflag_l);
     /* sflag_l not found */
@@ -62,7 +63,8 @@ __find_header:
   }
 
   if (vecChar.size() < FRAME_HEAD_SIZE + frame_payload_len +
-                           FRAME_CHECKSUM_SIZE + FRAME_END_SIZE) {
+    FRAME_CHECKSUM_SIZE + FRAME_END_SIZE)
+  {
     // cerr << "expected frame payload length: " << frame_payload_len << endl;
     // cerr << "frame payload data not enough now! wait more data." << endl;
     goto __finished;
@@ -70,12 +72,13 @@ __find_header:
 
   {
     uint8_t check_sum = std::accumulate(
-        vecChar.begin(), vecChar.begin() + FRAME_HEAD_SIZE + frame_payload_len,
-        (uint8_t)0);
+      vecChar.begin(), vecChar.begin() + FRAME_HEAD_SIZE + frame_payload_len,
+      (uint8_t)0);
 
     if (check_sum != ((uint8_t *)pf)[FRAME_HEAD_SIZE + frame_payload_len] ||
-        eflag != ((uint8_t *)pf)[FRAME_HEAD_SIZE + frame_payload_len +
-                                 FRAME_CHECKSUM_SIZE]) {
+      eflag != ((uint8_t *)pf)[FRAME_HEAD_SIZE + frame_payload_len +
+      FRAME_CHECKSUM_SIZE])
+    {
       // cerr << "src\tchecksum\ttail" << endl;
       // cerr << "data\t"
       //      << *(vecChar.begin() + FRAME_HEAD_SIZE + frame_payload_len) <<
@@ -93,10 +96,11 @@ __find_header:
   pf = (frame_t *)malloc(sizeof(frame_t) + frame_payload_len);
   memcpy(pf, &vecChar[0], sizeof(frame_t) + frame_payload_len);
 
-  std::vector<uint8_t>(vecChar.begin() + FRAME_HEAD_SIZE + frame_payload_len +
-                           FRAME_CHECKSUM_SIZE + FRAME_END_SIZE,
-                       vecChar.end())
-      .swap(vecChar);
+  std::vector<uint8_t>(
+    vecChar.begin() + FRAME_HEAD_SIZE + frame_payload_len +
+    FRAME_CHECKSUM_SIZE + FRAME_END_SIZE,
+    vecChar.end())
+  .swap(vecChar);
   return pf;
 
 __finished:
